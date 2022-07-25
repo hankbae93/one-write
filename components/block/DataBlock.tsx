@@ -2,10 +2,10 @@ import { BLOCK_PLACEHOLDER } from '@constants/message';
 import {
   Dispatch,
   FC,
-  FormEvent,
   KeyboardEvent,
   SetStateAction,
   useRef,
+  useState,
 } from 'react';
 import { BlockDataRole, BlockDataTypes } from '~/types/block';
 import { BlockWrapper } from './DataBlock.style';
@@ -19,16 +19,27 @@ interface Props {
 
 const DataBlock: FC<Props> = ({ id = 1, text, role = 'TEXT', setBlocks }) => {
   const blockRef = useRef() as React.MutableRefObject<HTMLDivElement>;
+  const [isComposing, setIsComposing] = useState(false);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    blockRef.current.classList.remove('active');
+    const { textContent } = e.currentTarget;
+    if (isComposing) return;
+
     switch (e.key) {
       case 'Enter':
         e.preventDefault();
+
         setBlocks((prev) => {
-          const newBlocksArray = [...prev];
+          const newBlocksArray = prev.map((block) =>
+            block.id === id
+              ? {
+                  ...block,
+                  text: textContent as string,
+                }
+              : block
+          );
           const newBlocks: BlockDataTypes = {
-            id: Math.random(),
+            id: new Date().getTime(),
             text: '',
             role: 'TEXT',
           };
@@ -38,24 +49,22 @@ const DataBlock: FC<Props> = ({ id = 1, text, role = 'TEXT', setBlocks }) => {
 
           return newBlocksArray;
         });
+
+        break;
+      case 'Backspace':
+        if (textContent?.length === 1) {
+          blockRef.current?.classList.add('active');
+        }
+        if (textContent?.length === 0) {
+          setBlocks((prev) => {
+            return prev.filter((block) => block.id !== id);
+          });
+        }
         break;
       default:
-        return;
+        blockRef.current?.classList.remove('active');
+        break;
     }
-  };
-
-  const onInput = (e: FormEvent<HTMLDivElement>) => {
-    const { textContent } = e.currentTarget;
-    // setBlocks((prev) => {
-    //   return prev.map((block) =>
-    //     block.id === id
-    //       ? {
-    //           ...block,
-    //           text: textContent as string,
-    //         }
-    //       : block
-    //   );
-    // });
   };
 
   return (
@@ -65,13 +74,15 @@ const DataBlock: FC<Props> = ({ id = 1, text, role = 'TEXT', setBlocks }) => {
       className={text ? '' : 'active'}
       contentEditable
       spellCheck
+      suppressContentEditableWarning
       role={role}
       ref={blockRef}
       placeholder={
         role === 'TEXT' ? BLOCK_PLACEHOLDER.TEXT : BLOCK_PLACEHOLDER.TITLE
       }
-      onKeyDown={handleKeyDown}
-      onInput={onInput}
+      onKeyDownCapture={handleKeyDown}
+      onCompositionStart={() => setIsComposing(true)}
+      onCompositionEnd={() => setIsComposing(false)}
     >
       {text}
     </BlockWrapper>

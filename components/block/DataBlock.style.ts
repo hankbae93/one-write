@@ -6,14 +6,13 @@ export const BlockWrapper = styled.div<{
   placeholder?: string;
 }>`
   position: relative;
-  padding: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  padding: 8px 15px;
   max-width: 100%;
   width: 100%;
   line-height: 1.2em;
   white-space: pre-wrap;
   word-break: break-word;
+  outline: none;
 
   &.active {
     min-height: 1em;
@@ -28,6 +27,7 @@ export const BlockWrapper = styled.div<{
   ${({ role }) =>
     role === 'TITLE' &&
     css`
+      font-weight: bold;
       font-size: 20px;
       line-height: 24px;
     `}

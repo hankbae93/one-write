@@ -5,7 +5,6 @@ import { EditorWrapper } from './Editor.style';
 
 const initialState: BlockDataTypes[] = [
   { id: 11111111, text: '', role: 'TITLE' },
-  { id: 1, text: '', role: 'TEXT' },
 ];
 
 const Editor = () => {
