@@ -1,4 +1,5 @@
 import { BLOCK_PLACEHOLDER } from '@constants/message';
+import { setEndOfContenteditable } from '@utils/getSelection';
 import {
   Dispatch,
   FC,
@@ -20,12 +21,50 @@ interface Props {
 const DataBlock: FC<Props> = ({ id = 1, text, role = 'TEXT', setBlocks }) => {
   const blockRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const [isComposing, setIsComposing] = useState(false);
+  const [textState, setTextState] = useState(text);
+  const commandsRef = useRef<string | null>(null);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const { textContent } = e.currentTarget;
     if (isComposing) return;
 
+    console.log(e.key);
+
     switch (e.key) {
+      case 'Control':
+        commandsRef.current = 'Control';
+        break;
+
+      case '1':
+        if (commandsRef.current === 'Control') {
+          e.preventDefault();
+          blockRef.current?.classList.remove('active');
+          setTextState(`"${textContent}"`);
+          commandsRef.current = null;
+          setEndOfContenteditable(blockRef.current);
+        }
+        break;
+
+      case '2':
+        if (commandsRef.current === 'Control') {
+          e.preventDefault();
+          blockRef.current?.classList.remove('active');
+          setTextState(`=====
+생명력: 0/0 0.00/분
+스테미나: 0/0 0.00분
+마나: 0/0 0.00/분
+일반 저항 - [%](내구 보너스)*(1.00)
+
+-----
+레벨 업!!
+능력치 포인트 (1)
+특성 포인트 (1)
+트리 포인트 (1)
+=====
+          `);
+          commandsRef.current = null;
+        }
+        break;
       case 'Enter':
         e.preventDefault();
 
@@ -55,8 +94,19 @@ const DataBlock: FC<Props> = ({ id = 1, text, role = 'TEXT', setBlocks }) => {
         if (textContent?.length === 1) {
           blockRef.current?.classList.add('active');
         }
+
         if (textContent?.length === 0) {
+          if (!e.currentTarget.previousElementSibling) return;
+          e.preventDefault();
+
+          setEndOfContenteditable(
+            e.currentTarget.previousElementSibling as Element
+          );
+
           setBlocks((prev) => {
+            if (prev.length === 1) {
+              return prev;
+            }
             return prev.filter((block) => block.id !== id);
           });
         }
@@ -84,7 +134,7 @@ const DataBlock: FC<Props> = ({ id = 1, text, role = 'TEXT', setBlocks }) => {
       onCompositionStart={() => setIsComposing(true)}
       onCompositionEnd={() => setIsComposing(false)}
     >
-      {text}
+      {textState}
     </BlockWrapper>
   );
 };
