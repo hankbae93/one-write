@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RecoilRoot } from 'recoil';
 import { theme } from '@styles/theme';
 import GlobalStyle from '@styles/global-style';
+import Layout from '@components/common/layout/Layout';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const queryClient = new QueryClient();
@@ -14,7 +15,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       <GlobalStyle />
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
-          <Component {...pageProps} />
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
           <ReactQueryDevtools />
         </RecoilRoot>
       </QueryClientProvider>
