@@ -1,7 +1,7 @@
 export type BlockDataRole = 'TITLE' | 'TEXT';
 
 export interface BlockDataTypes {
-  id: number;
+  id: string;
   text: string;
   role: BlockDataRole;
 }
